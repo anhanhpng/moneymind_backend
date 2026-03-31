@@ -1,0 +1,248 @@
+@baseUrl = http://127.0.0.1:8000/api
+# Biến token sẽ tự động lưu lại nếu bạn cài extension REST Client và "Send Request" Đăng nhập.
+@token = {{login.response.body.data.access_token}}
+
+### ===============================
+### 1. AUTHENTICATION 
+### ===============================
+
+# Đăng ký tài khoản (Register)
+POST {{baseUrl}}/register
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Nguyễn Văn A",
+    "email": "nguyenvana1@example.com",
+    "password": "password123",
+    "password_confirmation": "password123"
+}
+
+###
+
+# Đăng nhập (Login)
+# Lưu ý: Bấm gửi Request Đăng nhập để tự động lưu Access_Token vào biến @token dùng chung bên dưới.
+# @name login
+POST {{baseUrl}}/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "nguyenvana1@example.com",
+    "password": "password123"
+}
+
+###
+
+# Lấy thông tin user hiện tại (Me/Get User)
+GET {{baseUrl}}/user
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Đăng xuất tài khoản (Logout)
+POST {{baseUrl}}/logout
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### ===============================
+### 2. WALLETS (Ví nguồn tiền)
+### ===============================
+
+# Lấy danh sách ví (Get All Wallets)
+GET {{baseUrl}}/wallets
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Xem chi tiết 1 ví tiền (Show Wallet -> Ví dụ ID là 1)
+GET {{baseUrl}}/wallets/1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Tạo ví mới (Create Wallet)
+POST {{baseUrl}}/wallets
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Tiền mặt",
+    "balance": 5000000
+}
+
+###
+
+# Cập nhật thông tin ví (Update Wallet -> Ví dụ ID là 1)
+PUT {{baseUrl}}/wallets/1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Tiền mặt - Cập nhật",
+    "balance": 6000000
+}
+
+###
+
+# Xóa ví (Delete Wallet -> Ví dụ ID là 1)
+DELETE {{baseUrl}}/wallets/1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### ===============================
+### 3. CATEGORIES (Danh mục thu chi)
+### ===============================
+
+# Lấy danh sách danh mục (Get All Categories)
+GET {{baseUrl}}/categories
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Xem chi tiết danh mục (Show Category -> Ví dụ ID là 1)
+GET {{baseUrl}}/categories/1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Tạo danh mục TĂNG THU NHẬP (Create Income Category)
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Lương tháng",
+    "type": "income",
+    "color": "#00FF00",
+    "icon": "money-bill"
+}
+
+###
+
+# Tạo danh mục CHI TIÊU (Create Expense Category)
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Ăn uống",
+    "type": "expense",
+    "color": "#FF0000",
+    "icon": "utensils"
+}
+
+###
+
+# Cập nhật danh mục (Update Category -> Ví dụ ID là 1)
+PUT {{baseUrl}}/categories/1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Lương công ty",
+    "type": "income",
+    "color": "#11FF00",
+    "icon": "money-bill-wave"
+}
+
+###
+
+# Xóa danh mục (Delete Category -> Ví dụ ID là 1)
+DELETE {{baseUrl}}/categories/1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### ===============================
+### 4. TRANSACTIONS (Giao dịch)
+### ===============================
+
+# Danh sách giao dịch cơ bản
+GET {{baseUrl}}/transactions
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Lọc danh sách giao dịch nhiều tiêu chí (Filter & Pagination)
+GET {{baseUrl}}/transactions?type=expense&from_date=2026-03-01&to_date=2026-03-31&page=1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Xem chi tiết 1 giao dịch (Show Transaction -> Ví dụ ID là 1)
+GET {{baseUrl}}/transactions/1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+# Thêm 1 giao dịch CHI TIÊU (Sẽ TỰ ĐỘNG TRỪ TIỀN ở Ví ID: 1 nhờ vào Controller Database Transaction)
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "wallet_id": 1,
+    "category_id": 2, 
+    "amount": 50000,
+    "type": "expense",
+    "transaction_date": "2026-03-29",
+    "description": "Ăn phở buổi sáng"
+}
+
+###
+
+# Thêm 1 giao dịch THU NHẬP (Sẽ TỰ ĐỘNG CỘNG TIỀN ở Ví ID: 1)
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "wallet_id": 1,
+    "category_id": 1, 
+    "amount": 20000000,
+    "type": "income",
+    "transaction_date": "2026-03-10",
+    "description": "Nhận lương tháng"
+}
+
+###
+
+# Cập nhật giao dịch (Update Transaction -> Ví dụ ID là 1)
+PUT {{baseUrl}}/transactions/1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "wallet_id": 1,
+    "category_id": 2, 
+    "amount": 60000,
+    "type": "expense",
+    "transaction_date": "2026-03-29",
+    "description": "Ăn bún bò buổi sáng"
+}
+
+###
+
+# Xóa giao dịch (Delete Transaction -> Ví dụ ID là 1)
+DELETE {{baseUrl}}/transactions/1
+Accept: application/json
+Authorization: Bearer {{token}}
