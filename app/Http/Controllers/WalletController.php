@@ -27,7 +27,14 @@ class WalletController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('wallets')->where(function ($query) use ($request) {
+                    return $query->where('user_id', $request->user()->id);
+                })
+            ],
             'balance' => 'numeric'
         ]);
 
@@ -63,7 +70,13 @@ class WalletController extends Controller
         }
 
         $request->validate([
-            'name' => 'string|max:255',
+            'name' => [
+                'string',
+                'max:255',
+                \Illuminate\Validation\Rule::unique('wallets')->where(function ($query) use ($request) {
+                    return $query->where('user_id', $request->user()->id);
+                })->ignore($wallet->id)
+            ],
             'balance' => 'numeric'
         ]);
 

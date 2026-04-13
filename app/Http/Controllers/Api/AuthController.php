@@ -15,7 +15,7 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email:filter|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -54,7 +54,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|string|email',
+            'email' => 'required|string|email:filter',
             'password' => 'required|string',
         ]);
 
@@ -97,6 +97,63 @@ class AuthController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Đã có lỗi xảy ra khi đăng xuất',
+                'error_detail' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        try {
+            $user = $request->user();
+            
+            // Xóa tất cả các token đăng nhập hiện tại
+            $user->tokens()->delete();
+            
+            // Xóa người dùng. Do các bảng (wallets, categories, transactions...) 
+            // có foreign key user_id được cấu hình onDelete('cascade'), 
+            // tất cả dữ liệu liên quan sẽ tự động bị xóa.
+            $user->delete();
+
+            return response()->json([
+                'message' => 'Xoá tài khoản và toàn bộ dữ liệu thành công',
+                'data' => null
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Đã có lỗi xảy ra khi xoá tài khoản',
+                'error_detail' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed|different:current_password',
+        ]);
+
+        try {
+            $user = $request->user();
+
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'message' => 'Mật khẩu hiện tại không đúng'
+                ], 400);
+            }
+
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return response()->json([
+                'message' => 'Đổi mật khẩu thành công',
+                'data' => null
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Đã có lỗi xảy ra khi đổi mật khẩu',
                 'error_detail' => $e->getMessage()
             ], 500);
         }
