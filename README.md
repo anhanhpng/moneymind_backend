@@ -55,9 +55,3 @@ php artisan migrate
 php artisan serve
 ```
 => **Thành công!** Project đang chạy tại: `http://127.0.0.1:8000`
-
----
-
-## Kiểm thử API
-
-Cài đặt Extension **REST Client/Thunder Client** trên VS Code. Sau đó vào file **`api-tests.http`** ở thư mục gốc của project và bấm "Send Request" để test toàn bộ các lệnh API.
