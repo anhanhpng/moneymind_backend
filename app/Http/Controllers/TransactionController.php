@@ -377,6 +377,16 @@ class TransactionController extends Controller
                 ]);
 
                 $goal->update(['is_exceeded_notified' => true]);
+            } elseif ($spentAmount >= $goal->amount * 0.8 && !$goal->is_80_percent_notified) {
+                $categoryName = $goal->category ? $goal->category->name : 'Tổng hợp';
+                $message = "Cảnh báo: Chi tiêu {$categoryName} của bạn đã vượt 80% mục tiêu {$goal->amount}đ. Hãy cân nhắc lại nhé!";
+                
+                $user->custom_notifications()->create([
+                    'message' => $message,
+                    'is_read' => false,
+                ]);
+
+                $goal->update(['is_80_percent_notified' => true]);
             }
         }
     }

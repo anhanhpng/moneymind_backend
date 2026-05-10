@@ -45,6 +45,20 @@ class CheckGoals extends Command
                         'message' => $message,
                         'is_read' => false,
                     ]);
+                    
+                    if (!$goal->is_exceeded_notified) {
+                        $goal->update(['is_exceeded_notified' => true]);
+                    }
+                } elseif ($totalExpense >= $goal->amount * 0.8 && !$goal->is_80_percent_notified) {
+                    $message = "Chi tiêu {$categoryName} của bạn đã vượt 80% mục tiêu {$goal->amount}đ. Hãy cân nhắc lại nhé!";
+                    
+                    \App\Models\Notification::create([
+                        'user_id' => $goal->user_id,
+                        'message' => $message,
+                        'is_read' => false,
+                    ]);
+
+                    $goal->update(['is_80_percent_notified' => true]);
                 }
             }
 

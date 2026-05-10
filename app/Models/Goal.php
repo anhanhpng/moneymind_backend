@@ -13,6 +13,9 @@ class Goal extends Model
         'amount',
         'start_date',
         'end_date',
+        'is_exceeded_notified',
+        'is_completed_notified',
+        'is_80_percent_notified',
     ];
 
     public function user()
